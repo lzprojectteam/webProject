@@ -1266,7 +1266,8 @@ export default {
       sourceOrganizationCode: '来货单位代码',
       sourceOrganizationName: '来货单位',
       control: '状态',
-      desc: '描述'
+      desc: '描述',
+      materialGrant: '物资发放'
     },
     billOut: {
       bookId: '帐套',

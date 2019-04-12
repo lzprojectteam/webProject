@@ -50,12 +50,15 @@
       </div>
     </div>
     <main class='contentPanel'>
-      <tree-table highlight-current-row
-                  border
-                  :data="formData.processList"
-                  :columns="columns"
-                  style="width: 100%">
-
+      <el-table :data="formData.processList"
+                style="width: 100%;"
+                border
+                row-key="id">
+        <el-table-column v-for="item in columns"
+                         :key='item.value'
+                         :prop="item.value"
+                         :label="item.text"
+                         :width="item.width" />
         <el-table-column prop="position"
                          :label="this.$t('tobacco.tfarm.process.position')" />
         <el-table-column prop="control"
@@ -74,7 +77,7 @@
                          :label="this.$t('tobacco.tfarm.process.desc')" />
         <el-table-column fixed="right"
                          :label="$t('base.titleOperation')"
-                         width="220">
+                         width="260">
           <template slot-scope="scope">
             <el-button-group>
               <el-button plain
@@ -91,7 +94,7 @@
 
           </template>
         </el-table-column>
-      </tree-table>
+      </el-table>
     </main>
     <div class='footerPanel'>
 
