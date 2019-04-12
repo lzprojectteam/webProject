@@ -1,0 +1,37 @@
+/* 分组边框样式 */
+.cas-group {
+    border: 1px solid #ebebeb;
+    border-radius: 3px;
+    transition: 0.2s;
+    margin: 5px;
+    padding: 5px;
+}
+.cas-flex-2 {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.cas-flex-3 {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.cas-flex-4 {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.cas-flex-2 > div {
+    width: 50%;
+    padding: 0px 5px;
+}
+
+.cas-flex-3 > div {
+    width: 33.33%;
+    padding: 0px 5px;
+}
+
+.cas-flex-4 > div {
+    width: 25%;
+    padding: 0px 5px;
+}

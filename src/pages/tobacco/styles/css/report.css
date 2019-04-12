@@ -1,0 +1,69 @@
+#excelDefaults {
+    /*position: relative;*/
+    width: 100%;
+}
+#excelDefaults .t1 {
+    width: 100% !important;
+}
+
+#excelDefaults table {
+    table-layout: fixed;
+}
+
+#excelDefaults tr {
+    height: 36px !important;
+    background-color: #fff !important;
+}
+
+#excelDefaults tr.r2 {
+    z-index: 9999;
+}
+
+#excelDefaults tr td {
+    font-size: 12px !important;
+    color: #606266 !important;
+    font-family: Helvetica Neue, Helvetica, PingFang SC, Hiragino Sans GB,
+        Microsoft YaHei, Arial, sans-serif !important;
+    line-height: 36px !important;
+    padding-left: 10px;
+    width: 300px;
+}
+
+#excelDefaults tr.r2 td {
+    color: #909399 !important;
+}
+
+#excelDefaults tr:hover {
+    background-color: #f5f7fa;
+}
+
+#excelDefaults td {
+    border: 1px solid #dadde4 !important;
+    box-sizing: border-box !important;
+    text-overflow: ellipsis !important;
+    vertical-align: middle !important;
+    position: relative !important;
+}
+
+#excelDefaults tr:nth-child(1):hover,
+#excelDefaults tr:nth-child(2):hover,
+#excelDefaults tr:nth-child(3):hover,
+#excelDefaults tr:nth-child(4):hover,
+#excelDefaults tr:nth-child(5):hover,
+#excelDefaults tr:nth-child(6):hover {
+    background-color: #fff;
+}
+
+/*表2样式*/
+.outerBox {
+    display: none;
+    position: absolute;
+    width: auto;
+    left: 0;
+    top: 40px;
+    margin: auto;
+}
+
+.dataTable {
+    margin: auto;
+}

@@ -1,0 +1,10 @@
+.el-dialog__body {
+    padding: 0px 10px 10px;
+}
+.el-dialog__body > .el-form {
+    border: 1px solid #ebebeb;
+    border-radius: 3px;
+    transition: 0.2s;
+    margin: 5px;
+    padding: 5px;
+}
