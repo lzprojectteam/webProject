@@ -13,6 +13,7 @@
                             value-format="yyyy"
                             :placeholder="$t('base.pleaseSelect')"
                             @change='onAnnaulChange'></el-date-picker>
+                           
           </el-form-item>
           <el-form-item :label="$t('tobacco.tfarm.designScheme.name')">
             <el-select v-model="searchData.designScheme">
@@ -77,7 +78,7 @@
                          :label="this.$t('tobacco.tfarm.process.desc')" />
         <el-table-column fixed="right"
                          :label="$t('base.titleOperation')"
-                         width="260">
+                         width="381">
           <template slot-scope="scope">
             <el-button-group>
               <el-button plain
@@ -85,11 +86,17 @@
                          @click="onShowDialog(scope.row)">{{$t('tobacco.tfarm.process.configAtrr')}}</el-button>
               <el-button plain
                          @click="editButtonClick(scope.row,true)">{{$t('base.buttonEdit')}}</el-button>
-
+              <el-button
+                         plain
+                         :disabled='scope.row.children!==undefined&&scope.row.children.length>0'
+                         @click='showReport(scope.row)'>报表</el-button>
               <el-button type='danger'
                          plain
                          :disabled='scope.row.children!==undefined&&scope.row.children.length>0'
                          @click='deleteButtonConfirm(scope.row)'>{{ $t('base.buttonDelete') }} </el-button>
+                         
+              
+
             </el-button-group>
 
           </template>
@@ -124,124 +131,216 @@
                              :isEdit=childForm.isEdit
                              :visible.sync="childForm.editForm" />
       </el-dialog>
+      <!-- 报表弹出框 -->
+      <el-dialog
+  title="报表"
+  :visible.sync="centerDialogVisible"
+  width="40%"
+  >
+<el-row :gutter="20">
+  <el-col :span="6" style='text-align:center'>
+    <el-button type="primary" @click="addReport">新增</el-button>
+       <h6>报表名</h6>
+      
+      <div v-for='(item,index) in data'> 
+        <el-button @click="handleClick(index)" type="text" size="small" >
+        {{item.name}}
+        </el-button>
+      </div> 
+  </el-col>
+  <el-col :span="10" :offset='2' v-show='report'>
+    
+    <el-form ref="form" :model="form" label-width="80px">
+  <el-form-item label="数据项:">
+     <el-select v-model="form.region" placeholder="活动区域">
+      <el-option label="区域一" value="shanghai"></el-option>
+      <el-option label="区域二" value="beijing"></el-option>
+    </el-select>
+  </el-form-item>
+  <el-form-item label="报表维度:">
+     <el-select v-model="form.region" >
+      <el-option label="区域一" value="shanghai"></el-option>
+      <el-option label="区域二" value="beijing"></el-option>
+    </el-select>
+  </el-form-item>
+  <el-form-item label="统计方式:">
+     <el-select v-model="form.region" >
+      <el-option label="源数据" value="shanghai"></el-option>
+      <el-option label="累加" value="beijing"></el-option>
+        <el-option label="平均值" value="beijing"></el-option>
+    </el-select>
+  </el-form-item>
+  <el-form-item label="展示类型:">
+     <el-select v-model="form.region" >
+      <el-option label="饼状图" value="shanghai"></el-option>
+      <el-option label="柱状图" value="beijing"></el-option>
+       <el-option label="折线图" value="beijing"></el-option>
+    </el-select>
+  </el-form-item>
+  <el-form-item label="报表名:" >
+    
+    <el-input v-model="value"  size="small" ></el-input>
+  </el-form-item>
+
+</el-form>
+    
+  </el-col>
+</el-row>
+  <span slot="footer" class="dialog-footer">
+     <el-button type="danger" @click="innerVisible=true" >删除</el-button>
+    <el-button @click="closeReport">取 消</el-button>
+    <el-button type="primary" @click="saveRepor">确 定</el-button>
+  </span>
+  <el-dialog
+      width="30%"
+      title="确定删除吗？"
+      :visible.sync="innerVisible"
+      append-to-body>
+       <div slot="footer" class="dialog-footer">
+      <el-button @click="innerVisible = false">取 消</el-button>
+      <el-button type="primary" @click="deleteReport">确定</el-button>
+    </div>
+
+    </el-dialog>
+</el-dialog>
     </template>
   </div>
 </template>
 <script>
-const AddForm = () => import("./processAdd.vue");
-const EditForm = () => import("./processEdit.vue");
+const AddForm = () => import('./processAdd.vue');
+const EditForm = () => import('./processEdit.vue');
 
-import processApi from "../../api/tfarm/apiProcess";
-import categoryApi from "../../api/basic/api_category";
-import designSchemeClassifyApi from "../../api/tfarm/apiDesignSchemeClassify";
-import designSchemeApi from "../../api/tfarm/apiDesignScheme";
-import levelApi from "@/api/xbasic/apiLevel";
+import processApi from '../../api/tfarm/apiProcess';
+import categoryApi from '../../api/basic/api_category';
+import designSchemeClassifyApi from '../../api/tfarm/apiDesignSchemeClassify';
+import designSchemeApi from '../../api/tfarm/apiDesignScheme';
+import levelApi from '@/api/xbasic/apiLevel';
 export default {
   data() {
     return {
-      childForm: {
-        addForm: false,
-        editForm: false,
-        viewForm: false,
-        isEdit: false,
-        configForm: false
+      'childForm': {
+        'addForm': false,
+        'editForm': false,
+        'viewForm': false,
+        'isEdit': false,
+        'configForm': false,
+       
       },
-      dateoptions: {
-        shortcuts: [
+      // 
+      'reportID':'',
+        'centerDialogVisible':false,
+         'innerVisible' : false ,
+      'data':[],
+      'form':{
+          'region': 'shanghai'
+      },
+      'report':false,
+      'index':null,
+      'value':'',
+      'change':false,
+      // 
+      'dateoptions': {
+        'shortcuts': [
           {
-            text: this.$t("base.today"),
+            'text': this.$t('base.today'),
 
-            onClick: picker => {
+            'onClick': picker => {
               const end = new Date();
               const start = new Date();
               start.setTime(start.getTime() - 3600 * 1000 * 24);
-              picker.$emit("pick", [start, end]);
+              picker.$emit('pick', [start, end]);
             }
           },
           {
-            text: this.$t("base.yesterday"),
+            'text': this.$t('base.yesterday'),
 
             onClick(picker) {
               const end = new Date();
               const start = new Date();
               start.setTime(start.getTime() - 3600 * 1000 * 24 * 2);
-              picker.$emit("pick", [start, end]);
+              picker.$emit('pick', [start, end]);
             }
           },
           {
-            text: this.$t("base.threeMonth"),
+            'text': this.$t('base.threeMonth'),
             onClick(picker) {
               const end = new Date();
               const start = new Date();
               start.setTime(start.getTime() - 3600 * 1000 * 24 * 90);
-              picker.$emit("pick", [start, end]);
+              picker.$emit('pick', [start, end]);
             }
           }
         ]
       },
-      searchData: {
-        classify: "-",
-        annual: this.$store.state.system.annual.toString(),
-        designScheme: ""
+      'searchData': {
+        'classify': '-',
+        'annual': this.$store.state.system.annual.toString(),
+        'designScheme': ''
       },
-      formData: {
-        classifyList: [],
-        processList: [],
-        levelList: [],
-        designSchemeList: [],
-        pagination: {
+      'formData': {
+        'classifyList': [],
+        'processList': [],
+        'levelList': [],
+        'designSchemeList': [],
+        'pagination': {
           //用于分页的变量
-          currentPage: 1,
-          pageSize: 10,
-          total: 0,
-          keyword: "",
-          pageSizeOpts: [10, 15, 20, 25, 30]
+          'currentPage': 1,
+          'pageSize': 10,
+          'total': 0,
+          'keyword': '',
+          'pageSizeOpts': [10, 15, 20, 25, 30]
         },
-        rowSelection: [],
-        viewSelect: {}
+        'rowSelection': [],
+        'viewSelect': {}
       },
-      columns: [
+      'columns': [
         {
-          text: this.$t("tobacco.tfarm.process.name"),
-          value: "name",
-          width: 200
+          'text': this.$t('tobacco.tfarm.process.name'),
+          'value': 'name',
+          'width': 200
         },
         {
-          text: this.$t("tobacco.tfarm.process.code"),
-          value: "code"
+          'text': this.$t('tobacco.tfarm.process.code'),
+          'value': 'code'
         },
         {
-          text: this.$t("tobacco.tfarm.process.begin"),
-          value: "begin"
+          'text': this.$t('tobacco.tfarm.process.begin'),
+          'value': 'begin'
         },
         {
-          text: this.$t("tobacco.tfarm.process.from"),
-          value: "from"
+          'text': this.$t('tobacco.tfarm.process.from'),
+          'value': 'from'
         },
         {
-          text: this.$t("tobacco.tfarm.process.to"),
-          value: "to"
+          'text': this.$t('tobacco.tfarm.process.to'),
+          'value': 'to'
         }
       ]
     };
   },
   created() {
+    this.data=[
+      {
+      'name':'报表1'
+    },
+    {'name':'报表2'}
+    ]
     Promise.all([
       designSchemeClassifyApi.getAll({
-        size: 500,
-        page: 0,
-        sort: "id,asc"
+        'size': 500,
+        'page': 0,
+        'sort': 'id,asc'
       }),
       levelApi.getAll({
-        size: 500,
-        page: 0,
-        sort: "id",
-        search: "lead:eq:11"
+        'size': 500,
+        'page': 0,
+        'sort': 'id',
+        'search': 'lead:eq:11'
       }),
       designSchemeApi.getAll({
-        size: 500,
-        page: 0,
-        search: "startAnnual:eq:" + this.$store.state.system.annual.toString()
+        'size': 500,
+        'page': 0,
+        'search': 'startAnnual:eq:' + this.$store.state.system.annual.toString()
       })
     ])
       .then(([response, levelResponse, designResponse]) => {
@@ -254,19 +353,66 @@ export default {
       })
       .catch(error => {});
   },
-  components: {
-    "add-form": AddForm,
-    "edit-form": EditForm,
-    treeTable: () => import("@/components/TreeTable"),
-    processAttrConfig: () => import("./processAttrConfig")
+  'components': {
+    'add-form': AddForm,
+    'edit-form': EditForm,
+    'treeTable': () => import('@/components/TreeTable'),
+    'processAttrConfig': () => import('./processAttrConfig')
   },
-  methods: {
+  'methods': {
+      showReport(e){
+      console.log(e)
+      console.log( this.formData.designSchemeList)
+      this.reportID = e.id
+      this.centerDialogVisible  = true
+    //  Promise.all([
+    //    designSchemeApi.getAll({
+    //       'size': 500,
+    //       'page': 0,
+    //       'search': 'startAnnual:eq:' + annual
+    //     })
+    //   ])
+    //     .then(([designResponse]) => {
+    //       this.formData.designSchemeList = designResponse.content;
+    //     })
+      },
+      addReport(){
+      this.report=true
+      this.value=''
+      this.change=true
+    },
+    saveRepor(){
+      this.centerDialogVisible  =false
+      this.report=false
+      if(this.change===true){
+        this.data.push({'name':this.value})
+      }
+      else{
+         this.data[this.index].name=this.value
+      }
+      this.change=false
+    },
+    closeReport(){
+      this.report=false
+      this.centerDialogVisible  =false
+      this.change=false
+    },
+     deleteReport(){
+      this.innerVisible=false
+      this.data.splice(this.index,1)
+    },
+   handleClick(e) {
+      this.index=e
+      this.report=true
+      this.value=this.data[e].name
+    },
+  
     onAnnaulChange(annual) {
       Promise.all([
         designSchemeApi.getAll({
-          size: 500,
-          page: 0,
-          search: "startAnnual:eq:" + annual
+          'size': 500,
+          'page': 0,
+          'search': 'startAnnual:eq:' + annual
         })
       ])
         .then(([designResponse]) => {
@@ -291,8 +437,8 @@ export default {
       Promise.all([processApi.deleteProcess(row.id)])
         .then(([response]) => {
           this.$message({
-            type: "info",
-            message: this.$t("message.deleteOk")
+            'type': 'info',
+            'message': this.$t('message.deleteOk')
           });
           this.formData.selectRow = null;
           this.onSearchButtonClick();
@@ -301,12 +447,12 @@ export default {
     },
     deleteButtonConfirm(row) {
       this.$confirm(
-        this.$t("message.deleteConfirm"),
-        this.$t("base.titleTip"),
+        this.$t('message.deleteConfirm'),
+        this.$t('base.titleTip'),
         {
-          confirmButtonText: this.$t("base.buttonOk"),
-          cancelButtonText: this.$t("base.buttonCancel"),
-          type: "warning"
+          'confirmButtonText': this.$t('base.buttonOk'),
+          'cancelButtonText': this.$t('base.buttonCancel'),
+          'type': 'warning'
         }
       )
         .then(() => {
@@ -314,8 +460,8 @@ export default {
         })
         .catch(() => {
           this.$message({
-            type: "info",
-            message: this.$t("message.cancel")
+            'type': 'info',
+            'message': this.$t('message.cancel')
           });
         });
     },
@@ -330,16 +476,16 @@ export default {
           this.searchData.classify,
           this.$store.getters.user.organization !== undefined
             ? this.$store.getters.user.organization.organizationId
-            : ""
+            : ''
         )
       ])
         .then(([response]) => {
           this.formData.processList = response;
           this.$notify({
-            title: this.$t("base.hint"),
-            message: this.$t("base.loadingDone"),
-            duration: 1000,
-            position: "bottom-right"
+            'title': this.$t('base.hint'),
+            'message': this.$t('base.loadingDone'),
+            'duration': 1000,
+            'position': 'bottom-right'
           });
         })
         .catch(error => {});
